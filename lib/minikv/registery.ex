@@ -37,8 +37,8 @@ defmodule Minikv.Registry do
   def handle_call({:get, key}, _from, data) do
     result =
       case :ets.lookup(data.table, key) do
-        [{^key, value}] ->
-          value
+        [{^key, %{val: val}}] ->
+          val
 
         [] ->
           nil
@@ -48,14 +48,14 @@ defmodule Minikv.Registry do
   end
 
   def handle_call({:put, key, val}, _from, data) do
-    true = :ets.insert(data.table, {key, val})
+    true = :ets.insert(data.table, {key, %{val: val, time: current_time()}})
     {:reply, {:ok, val}, data}
   end
 
   def handle_call({:del, key}, _from, data) do
     result =
       case :ets.lookup(data.table, key) do
-        [{^key, val}] ->
+        [{^key, %{val: val}}] ->
           true = :ets.delete(data.table, key)
           val
 
@@ -64,5 +64,14 @@ defmodule Minikv.Registry do
       end
 
     {:reply, {:ok, result}, data}
+  end
+
+  def handle_call({:sync, key, %{val: val, time: time}}, _from, data) do
+    true = :ets.insert(data.table, {key, %{val: val, time: time}})
+    {:noreply}
+  end
+
+  defp current_time() do
+    System.system_time(:nanosecond)
   end
 end

@@ -27,5 +27,7 @@ defmodule MinikvTest do
              Minikv.Kv.put(kv, nil, "nil value")
   end
 
+  # TODO: test "sync"
+  # TODO: test "clustering"
   # TODO: test "using macro"
 end
