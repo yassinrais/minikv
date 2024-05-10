@@ -1,30 +1,35 @@
 defmodule MinikvTest do
   use ExUnit.Case, async: true
 
+  alias Minikv.Kv
+
   setup do
-    {:ok, _pid} = Supervisor.start_link(Minikv.Kv, name: ExKv)
-    {:ok, kv: ExKv}
+    {:ok, _pid} = Supervisor.start_link(Minikv.Kvs, name: TestKv)
+    {:ok, kv: TestKv, node: node()}
   end
 
-  test "write keys values", %{kv: kv} do
-    assert Minikv.Kv.get(kv, :my_key) == {:ok, nil}
-    assert Minikv.Kv.put(kv, :my_key, "cool") == {:ok, "cool"}
-    assert Minikv.Kv.get(kv, :my_key) == {:ok, "cool"}
+  test "put/set keys values", %{kv: kv, node: node} do
+    assert Minikv.Kvs.get(kv, :key_1) == nil
+
+    assert %Kv{val: "put test", node: ^node} = Minikv.Kvs.put(kv, :key_1, "put test")
+    assert %Kv{val: "put test", node: ^node} = Minikv.Kvs.get(kv, :key_1)
+
+    assert %Kv{val: "set test", node: ^node} = Minikv.Kvs.set(kv, :key_1, "set test")
+    assert %Kv{val: "set test", node: ^node} = Minikv.Kvs.get(kv, :key_1)
   end
 
-  test "remove keys values", %{kv: kv} do
-    assert Minikv.Kv.get(kv, :my_del_key) == {:ok, nil}
-    assert Minikv.Kv.del(kv, :my_del_key) == {:ok, nil}
-    assert Minikv.Kv.put(kv, :my_del_key, "test") == {:ok, "test"}
-    assert Minikv.Kv.del(kv, :my_del_key) == {:ok, "test"}
+  test "delete keys values", %{kv: kv, node: node} do
+    assert Minikv.Kvs.get(kv, :key_2) == nil
+    assert Minikv.Kvs.delete(kv, :key_2) == nil
+    assert %Kv{val: "test", node: ^node} = Minikv.Kvs.put(kv, :key_2, "test")
+    assert %Kv{val: "test", node: ^node} = Minikv.Kvs.delete(kv, :key_2)
   end
 
   test "using invalid keys", %{kv: kv} do
-    assert {:kv_invalid_key, "nil is not valid keyname"} == Minikv.Kv.get(kv, nil)
-    assert {:kv_invalid_key, "nil is not valid keyname"} == Minikv.Kv.del(kv, nil)
+    assert {:invalid_key, _} = Minikv.Kvs.get(kv, nil)
+    assert {:invalid_key, _} = Minikv.Kvs.delete(kv, nil)
 
-    assert {:kv_invalid_key, "nil is not valid keyname"} ==
-             Minikv.Kv.put(kv, nil, "nil value")
+    assert {:invalid_key, _} = Minikv.Kvs.put(kv, nil, "nil value")
   end
 
   # TODO: test "sync"

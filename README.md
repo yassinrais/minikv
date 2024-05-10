@@ -15,13 +15,13 @@ defmodule MyKvs do
 end
 ```
 
-You can then use the get, put, and del functions to interact with your key-value store:
+You can then use the get, put, and delete functions to interact with your key-value store:
 ```elixir
 iex> MyKvs.put(:my_key, "my_value")
 :ok
 iex> MyKvs.get(:my_key)
 %Minikv.Kv{val: "my_value", node: :"node1:localhost", time: 123456789}
-iex> MyKvs.del(:my_key)
+iex> MyKvs.delete(:my_key)
 :ok
 ```
 

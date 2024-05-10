@@ -52,7 +52,6 @@ defmodule Minikv.Kvs do
     Registry.get(target_ets_name(name), key)
   end
 
-  @spec put(any(), binary(), any()) :: result()
   @doc """
   Puts a value into the KVS.
 
@@ -66,15 +65,27 @@ defmodule Minikv.Kvs do
   end
 
   @doc """
+  Puts a value into the KVS.
+
+  ## Example
+      iex> Minikv.Kvs.set(:my_kvs, "my_key", "my_value")
+      :ok
+  """
+  @spec set(atom(), binary(), any()) :: result()
+  def set(name, key, value) do
+    Registry.put(target_ets_name(name), key, value)
+  end
+
+  @doc """
   Deletes a value from the KVS.
 
   ## Example
-      iex> Minikv.Kvs.del(:my_kvs, "my_key")
+      iex> Minikv.Kvs.delete(:my_kvs, "my_key")
       :ok
   """
-  @spec del(atom(), binary()) :: result()
-  def del(name, key) do
-    Registry.del(target_ets_name(name), key)
+  @spec delete(atom(), binary()) :: result()
+  def delete(name, key) do
+    Registry.delete(target_ets_name(name), key)
   end
 
   defp target_ets_name(name) do
@@ -102,7 +113,7 @@ defmodule Minikv.Kvs do
       end
 
       def get(key), do: Minikv.Kvs.get(__MODULE__, key)
-      def del(key), do: Minikv.Kvs.del(__MODULE__, key)
+      def delete(key), do: Minikv.Kvs.delete(__MODULE__, key)
       def put(key, value), do: Minikv.Kvs.put(__MODULE__, key, value)
     end
   end
