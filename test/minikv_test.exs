@@ -3,9 +3,13 @@ defmodule MinikvTest do
 
   alias Minikv.Kv
 
-  setup do
-    {:ok, pid} = Minikv.Kvs.start_link(name: TestKv)
-    {:ok, pid: pid, kv: TestKv, node: node()}
+  setup_all do
+    {:ok, kv: TestKv, node: node()}
+  end
+
+  setup_all %{kv: kv} do
+    {:ok, pid} = Minikv.Kvs.start_link(name: kv)
+    {:ok, pid: pid}
   end
 
   test "put/set key-value", %{kv: kv, node: node} do
