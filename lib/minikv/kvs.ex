@@ -158,6 +158,11 @@ defmodule Minikv.Kvs do
       def get(key), do: Minikv.Kvs.get(__MODULE__, key)
       def delete(key), do: Minikv.Kvs.delete(__MODULE__, key)
       def put(key, value), do: Minikv.Kvs.put(__MODULE__, key, value)
+
+      def persist(key, value), do: Minikv.Kvs.persist(__MODULE__, key, value)
+
+      def lock(key, value), do: Minikv.Kvs.lock(__MODULE__, key, value)
+      def unlock(key, value), do: Minikv.Kvs.unlock(__MODULE__, key, value)
     end
   end
 end

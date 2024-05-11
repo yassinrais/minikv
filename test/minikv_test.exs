@@ -4,8 +4,8 @@ defmodule MinikvTest do
   alias Minikv.Kv
 
   setup do
-    {:ok, _pid} = Supervisor.start_link(Minikv.Kvs, name: TestKv)
-    {:ok, kv: TestKv, node: node()}
+    {:ok, pid} = Minikv.Kvs.start_link(name: TestKv)
+    {:ok, pid: pid, kv: TestKv, node: node()}
   end
 
   test "put/set key-value", %{kv: kv, node: node} do

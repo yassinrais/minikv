@@ -245,7 +245,7 @@ defmodule Minikv.Registry do
     {:noreply, state}
   end
 
-  def handle_cast({table, :put_bulk, [%Kv{}] = kvs}, state) do
+  def handle_cast({table, :put_bulk, kvs}, state) do
     true = :ets.insert(table, kvs)
     {:noreply, state}
   end

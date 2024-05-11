@@ -10,6 +10,7 @@ defmodule Minikv.MixProject do
       version: "0.1.0",
       elixir: "~> 1.16",
       start_permanent: Mix.env() == :prod,
+      test_coverage: [tool: ExCoveralls],
       deps: deps(),
       aliases: aliases(),
       package: package(),
@@ -29,7 +30,8 @@ defmodule Minikv.MixProject do
       {:libcluster, "~> 3.3"},
       {:local_cluster, "~> 1.2", only: [:test]},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
-      {:dialyxir, "~> 1.0", only: :dev, runtime: false}
+      {:dialyxir, "~> 1.0", only: :dev, runtime: false},
+      {:excoveralls, "~> 0.18.1", only: [:test]}
     ]
   end
 
