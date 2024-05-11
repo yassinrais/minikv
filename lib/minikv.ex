@@ -9,6 +9,6 @@ defmodule Minikv do
       {Cluster.Supervisor, [topologies, [name: Minikv.ClusterSupervisor]]}
     ]
 
-    Supervisor.start_link(children, strategy: :one_for_one, name: Minikv.Kvs)
+    Supervisor.start_link(children, strategy: :one_for_one)
   end
 end
