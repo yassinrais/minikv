@@ -1,38 +1,112 @@
-### Minikv: A Distributed Key-Value Store for Elixir
+Minikv
+=======
 
-Minikv is a lightweight, distributed key-value store library for Elixir, it provides a simple, intuitive API for storing and retrieving data, while handling the clustering and synchronization between the nodes.
+Minikv is a distributed key-value store built with Elixir using :ets and GenServer. It offers a simple API for creating, updating, retrieving, and deleting key-value pairs, as well as advanced features like key expiration, locking, and persistence.
 
-### Features
-* **Easy clustering**: Easily cluster nodes using the libcluster library, enabling smooth scaling of your key-value store.
-* **Automatic synchronization**: Minikv automatically syncs data across all nodes, keeping your cluster up-to-date without any hassle.
+Installation
+------------
 
-### Usage
+To use Minikv in your Elixir project, add it as a dependency in your `mix.exs` file:
 
-To use Minikv, simply add it to your Elixir project as a dependency, and then create a new instance of the `Minikv.Kvs` supervisor:
 ```elixir
-defmodule MyKvs do
-  use Minikv.Kvs
+defp deps do
+  [
+    {:minikv, git: "git@github.com:yassinrais/minikv.git", branch: "master"}
+  ]
 end
 ```
 
-You can then use the get, put, and delete functions to interact with your key-value store:
+
+Then run `mix deps.get` to fetch the dependency.
+
+Example Usage
+-----
+
+### Storing a value
+
+To store a value in the registry, you can use the `Minikv.Registry.put/3` function:
+
 ```elixir
-iex> MyKvs.put(:my_key, "my_value")
-:ok
-iex> MyKvs.get(:my_key)
-%Minikv.Kv{val: "my_value", node: :"node1:localhost", time: 123456789}
-iex> MyKvs.delete(:my_key)
-:ok
+iex> Minikv.Registry.put(WalletExKv, :my_balance, "100$")
+%Minikv.Kv{value: "100$"}
 ```
 
-### Configuration
+### Retrieving a value
 
-Minikv uses the libcluster library to manage clustering, so you'll need to configure libcluster in your application. You can do this by adding the following configuration to your config.exs file:
+To retrieve a value from the registry, you can use the `Minikv.Registry.get/2` function:
+
 ```elixir
-config :libcluster,
-  topologies: [
-    minikv: [
-      strategy: Cluster.Strategy.Epmd
-    ]
-  ]
+iex> Minikv.Registry.get(WalletExKv, :my_balance)
+%Minikv.Kv{value: "100$", node: :node1, time: 123456789}
+```
+
+### Deleting a value
+
+To delete a value from the registry, you can use the `Minikv.Registry.delete/2` function:
+
+```elixir
+iex> Minikv.Registry.delete(WalletExKv, :my_balance)
+%Minikv.Kv{value: "100$"}
+```
+
+### Locking a key
+
+Minikv allows you to lock a key in the registry, preventing other nodes from modifying it. To lock a key, you can use the `Minikv.Registry.lock/2` function:
+
+```elixir
+iex> Minikv.Registry.lock(WalletExKv, :my_balance)
+%Minikv.Kv{value: "100$", lock: true}
+```
+
+### Unlocking a key
+
+To unlock a key in the registry, you can use the `Minikv.Registry.unlock/2` function:
+
+```elixir
+iex> Minikv.Registry.unlock(WalletExKv, :my_balance)
+%Minikv.Kv{value: "100$", lock: nil}
+```
+
+### Persisting a key-value
+
+To persist a key-value in the registry, you can use the `Minikv.Registry.persist/2` function:
+
+```elixir
+iex> Minikv.Registry.persist(WalletExKv, :my_balance)
+%Minikv.Kv{value: "100$", exp: nil}
+```
+
+Advanced Usage
+--------------
+
+### Customizing key-value options
+
+When storing a value in the registry, you can customize the options associated with the key-value pair. The `Minikv.Registry.put/3` function accepts a list of options as the third argument:
+
+```elixir
+iex> Minikv.Registry.put(WalletExKv, :my_balance, [value: "100$", ttl: 1000])
+%Minikv.Kv{value: "100$", exp: 123_456_789_100}
+```
+
+In the above example, we've set the `ttl` (time-to-live) of the key-value pair to 1000 milliseconds. Other available options include:
+
+* `:lock` - A boolean value indicating whether the key should be locked.
+* `:persist` - A boolean value indicating whether the key-value should be persisted.
+
+### Handling errors
+
+The functions provided by Minikv can return errors in certain situations. For example, if you try to retrieve a value for a key that doesn't exist, the `Minikv.Registry.get/2` function will return `nil`.
+
+```elixir
+iex> Minikv.Registry.get(WalletExKv, :nonexistent_key)
+nil
+```
+
+Similarly, if you try to lock a key that's already locked by another process, the `Minikv.Registry.lock/2` function will return `{:error, :locked}`.
+
+```elixir
+iex> Minikv.Registry.lock(WalletExKv, :my_balance)
+%Minikv.Kv{value: "100$", lock: true}
+iex> Minikv.Registry.lock(WalletExKv, :my_balance)
+{:error, :locked}
 ```

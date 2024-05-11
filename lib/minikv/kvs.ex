@@ -6,6 +6,9 @@ defmodule Minikv.Kvs do
   alias Minikv.Kv
   alias Minikv.Registry
 
+  @type kv() :: Minikv.Kv.t()
+  @type result() :: nil | %Kv{}
+
   @spec child_spec(keyword()) :: map()
   def child_spec(opts) do
     %{
@@ -33,19 +36,18 @@ defmodule Minikv.Kvs do
     end
 
     children = [
-      {Registry, [name: table_name]}
+      {Registry, Keyword.merge(opts, name: table_name)}
     ]
 
     Supervisor.init(children, strategy: :one_for_one)
   end
 
-  @type result() :: nil | %Kv{}
   @doc """
   Retrieves a value from the KVS.
 
   ## Example
       iex> Minikv.Kvs.get(:my_kvs, "my_key")
-      %Kv{val: "my_value", node: :node1, time: 123456789}
+      %Kv{value: "my_value", node: :node1, time: 123456789}
   """
   @spec get(atom(), binary()) :: result()
   def get(name, key) do
@@ -59,9 +61,9 @@ defmodule Minikv.Kvs do
       iex> Minikv.Kvs.put(:my_kvs, "my_key", "my_value")
       :ok
   """
-  @spec put(atom(), binary(), any()) :: result()
-  def put(name, key, value) do
-    Registry.put(target_ets_name(name), key, value)
+  @spec put(atom(), binary(), kv() | any()) :: result()
+  def put(name, key, value_or_opts) do
+    Registry.put(target_ets_name(name), key, value_or_opts)
   end
 
   @doc """
@@ -71,9 +73,9 @@ defmodule Minikv.Kvs do
       iex> Minikv.Kvs.set(:my_kvs, "my_key", "my_value")
       :ok
   """
-  @spec set(atom(), binary(), any()) :: result()
-  def set(name, key, value) do
-    Registry.put(target_ets_name(name), key, value)
+  @spec set(atom(), binary(), any() | kv()) :: result()
+  def set(name, key, value_or_opts) do
+    Registry.put(target_ets_name(name), key, value_or_opts)
   end
 
   @doc """
@@ -86,6 +88,47 @@ defmodule Minikv.Kvs do
   @spec delete(atom(), binary()) :: result()
   def delete(name, key) do
     Registry.delete(target_ets_name(name), key)
+  end
+
+  @doc """
+  Persist a key value in the registry.
+
+  ## Example
+      iex> {:ok, registry} = Minikv.Kvs.start_link(name: :my_registry)
+      iex> Minikv.Kvs.delete(registry, "my_key")
+      :ok
+  """
+  @spec persist(atom(), binary()) :: result()
+  def persist(name, key) do
+    Registry.persist(target_ets_name(name), key)
+  end
+
+  @doc """
+  Lock a key in the registry.
+
+  ## Example
+      iex> {:ok, registry} = Minikv.Kvs.start_link(name: :my_registry)
+      iex> Minikv.Kvs.lock(registry, "my_key")
+      :ok
+  """
+  @spec lock(atom(), binary()) :: result()
+  def lock(name, key) do
+    Registry.lock(target_ets_name(name), key)
+  end
+
+  @doc """
+  Unlock a key in the registry.
+
+  ## Example
+      iex> {:ok, registry} = Minikv.Kvs.start_link(name: :my_registry)
+      iex> Minikv.Kvs.lock(registry, "my_key")
+      :ok
+      iex> Minikv.Kvs.unlock(registry, "my_key")
+      :ok
+  """
+  @spec unlock(atom(), binary()) :: result()
+  def unlock(name, key) do
+    Registry.unlock(target_ets_name(name), key)
   end
 
   defp target_ets_name(name) do

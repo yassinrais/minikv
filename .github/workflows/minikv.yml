@@ -1,0 +1,60 @@
+name: "minikv"
+
+on: [push, pull_request]
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    env:
+      MIX_ENV: dev
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: erlef/setup-elixir@v1
+        with:
+          otp-version: 26.2
+          elixir-version: 1.16.2
+
+      - uses: actions/cache@v3
+        with:
+          path: deps
+          key: deps-${{ env.CACHE_VERSION }}-${{ github.ref }}-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
+          restore-keys: |
+            deps-${{ env.CACHE_VERSION }}-${{ github.ref }}-
+            deps-${{ env.CACHE_VERSION }}-
+
+      - run: mix deps.get
+      - run: mix deps.compile
+      - run: mix format --check-formatted
+      - run: mix deps.unlock --check-unused
+      - run: mix dialyzer
+      - run: mix docs
+
+  test:
+    runs-on: ubuntu-latest
+    name: Test Elixir ${{ matrix.elixir }}, OTP ${{ matrix.otp }}, OS ${{ matrix.os }}
+    env:
+      MIX_ENV: test
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: erlef/setup-elixir@v1
+        with:
+          otp-version: 26.2
+          elixir-version: 1.16.2
+
+      - name: Restore cached deps
+        uses: actions/cache@v3
+        with:
+          path: deps
+          key: deps-${{ env.CACHE_VERSION }}-${{ github.ref }}-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
+          restore-keys: |
+            deps-${{ env.CACHE_VERSION }}-${{ github.ref }}-
+            deps-${{ env.CACHE_VERSION }}-
+
+      - run: mix deps.get
+      - run: mix compile --warnings-as-errors
+      - run: mix test
