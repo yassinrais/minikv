@@ -5,8 +5,8 @@ Minikv
 [![MIT License](https://img.shields.io/github/license/yassinrais/minikv)](https://github.com/yassinrais/minikv/blob/main/LICENSE)
 [![Coveralls](https://coveralls.io/repos/yassinrais/minikv/badge.svg?branch=main)](https://coveralls.io/r/yassinrais/minikv?branch=master)
 
-Minikv is a distributed key-value store built with Elixir using :ets and GenServer. It offers a simple API for creating, updating, retrieving, and deleting key-value pairs, as well as advanced features like key expiration, locking, and persistence.
-
+Minikv: A lightweight Elixir library for building distributed key-value stores (:ets) featuring asynchronous replication between nodes,
+offering a simple way to store and retrieve key-value pairs, with advanced features like key expiration, locking, and persistence.
 
 Installation
 ------------
@@ -16,7 +16,7 @@ To use Minikv in your Elixir project, add it as a dependency in your `mix.exs` f
 ```elixir
 defp deps do
   [
-    {:minikv, "~> 0.1.0"}
+    {:minikv, "~> 0.1.1"}
   ]
 end
 ```

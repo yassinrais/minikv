@@ -1,13 +1,13 @@
 defmodule Minikv.MixProject do
   use Mix.Project
 
+  @version "0.1.1"
   @source_url "https://github.com/yassinrais/minikv"
-  @version "0.1.0"
 
   def project do
     [
       app: :minikv,
-      version: "0.1.0",
+      version: @version,
       elixir: "~> 1.16",
       start_permanent: Mix.env() == :prod,
       test_coverage: [tool: ExCoveralls],
@@ -44,7 +44,8 @@ defmodule Minikv.MixProject do
   defp package do
     [
       description: """
-        Minikv is a simple, distributed key-value store built with Elixir,
+        Minikv: A lightweight Elixir library for building distributed key-value stores (:ets),
+         featuring asynchronous replication between nodes.
       """,
       maintainers: ["Yassine Rais"],
       licenses: ["MIT"],
