@@ -1,18 +1,20 @@
 defmodule MinikvTest do
   use ExUnit.Case, async: true
-
   alias Minikv.Kv
 
   setup_all do
-    {:ok, kv: TestKv, node: node()}
+    {:ok, node: node()}
   end
 
-  setup_all %{kv: kv} do
-    {:ok, pid} = Minikv.Kvs.start_link(name: kv)
-    {:ok, pid: pid}
+  setup context do
+    # for async
+    kv = :"TestKv.L#{context.line}"
+
+    {:ok, _pid} = Minikv.Kvs.start_link(name: kv)
+    {:ok, kv: kv}
   end
 
-  test "put/set key-value", %{kv: kv, node: node} do
+  test "put/set key-value ", %{kv: kv, node: node} do
     assert Minikv.Kvs.get(kv, :key_1) == nil
 
     assert %Kv{value: "put test", node: ^node} = Minikv.Kvs.put(kv, :key_1, "put test")

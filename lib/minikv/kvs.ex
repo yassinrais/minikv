@@ -19,7 +19,7 @@ defmodule Minikv.Kvs do
 
   @spec start_link(keyword()) :: {:ok, pid()}
   def start_link(opts) do
-    Supervisor.start_link(__MODULE__, opts, name: __MODULE__)
+    Supervisor.start_link(__MODULE__, opts)
   end
 
   def init(opts) do
